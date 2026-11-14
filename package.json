@@ -1,0 +1,14 @@
+{
+  "name": "astra-tarot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "星屿塔罗：本地运行的 78 张塔罗牌应用",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/validate.mjs",
+    "build:installer": "powershell -NoProfile -ExecutionPolicy Bypass -File installer/build.ps1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

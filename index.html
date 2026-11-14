@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b13">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="星屿塔罗">
+  <meta name="description" content="星屿塔罗：一副安静、私密的 78 张塔罗牌。支持多种牌阵、正逆位、每日一牌与本地占卜记录。">
+  <title>星屿塔罗 · Astra Tarot</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="ambient" aria-hidden="true">
+    <span class="ambient__orb ambient__orb--one"></span>
+    <span class="ambient__orb ambient__orb--two"></span>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="#reading" data-nav="reading" aria-label="星屿塔罗首页">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="1" opacity=".55"/>
+          <path d="M31 10.5a14.2 14.2 0 1 0 0 27 12 12 0 0 1 0-27Z" fill="currentColor" opacity=".9"/>
+          <path d="m35 16 1.1 3.1 3.1 1.1-3.1 1.1L35 24.4l-1.1-3.1-3.1-1.1 3.1-1.1L35 16Z" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand__text">
+        <b>星屿塔罗</b>
+        <small>ASTRA TAROT</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="主导航">
+      <button type="button" class="nav-btn is-active" data-view="reading">占卜</button>
+      <button type="button" class="nav-btn" data-view="daily">每日一牌</button>
+      <button type="button" class="nav-btn" data-view="deck">牌库</button>
+      <button type="button" class="nav-btn" data-view="history">记录</button>
+    </nav>
+
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="sound-btn" aria-pressed="false" aria-label="开启声音" title="开启声音">
+        <svg class="sound-on" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M17 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M19.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+        </svg>
+        <svg class="sound-off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="m17 9 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================ 占卜 ============================ -->
+    <section class="view" id="view-reading" data-view-panel="reading">
+      <div class="hero">
+        <p class="eyebrow"><span class="eyebrow__line"></span>A QUIET PLACE TO ASK</p>
+        <h1>把问题交给牌面，<em>把答案留给自己。</em></h1>
+        <p class="hero__sub">78 张全牌 · 正逆位 · 数据只留在此设备。塔罗不替你决定未来，它照见你此刻的位置。</p>
+      </div>
+
+      <div class="reading-shell">
+        <aside class="panel setup-panel" aria-label="占卜设置">
+          <div class="panel__head"><span>01 / 你的提问</span><span class="panel__rule"></span></div>
+          <label class="field" for="question">
+            <span class="field__label">此刻，你想问什么？</span>
+            <textarea id="question" maxlength="120" rows="2" placeholder="例如：我该不该接受这份新的工作机会？"></textarea>
+            <span class="field__count"><span id="question-count">0</span>/120</span>
+          </label>
+          <div class="prompt-chips" id="prompt-chips" aria-label="提问示例">
+            <button type="button" data-prompt="我该如何面对这段关系？">关于关系</button>
+            <button type="button" data-prompt="这份工作适合我吗？">关于事业</button>
+            <button type="button" data-prompt="此刻我最需要看见什么？">关于自己</button>
+          </div>
+
+          <div class="panel__head panel__head--spaced"><span>02 / 选择牌阵</span><span class="panel__rule"></span></div>
+          <div class="spread-list" id="spread-list" role="radiogroup" aria-label="选择牌阵"></div>
+
+          <button type="button" class="primary-btn" id="deal-btn">
+            <span class="primary-btn__label">洗牌并抽牌</span>
+            <span class="primary-btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <p class="privacy-note">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 7V5a3.5 3.5 0 1 1 7 0v2" stroke="currentColor" stroke-width="1.2"/><rect x="3" y="7" width="10" height="7" rx="1.6" stroke="currentColor" stroke-width="1.2"/></svg>
+            所有抽牌与记录仅保存在你的浏览器中。
+          </p>
+        </aside>
+
+        <section class="panel table-panel" aria-label="牌桌">
+          <div class="table-head">
+            <div>
+              <p class="table-kicker" id="table-kicker">READY WHEN YOU ARE</p>
+              <h2 id="table-title">牌桌在等你</h2>
+            </div>
+            <button type="button" class="ghost-btn" id="reset-btn" hidden>重新开始</button>
+          </div>
+
+          <div class="table-stage">
+            <div class="table-empty" id="table-empty">
+              <div class="deck-visual" aria-hidden="true">
+                <span class="deck-visual__card deck-visual__card--3"></span>
+                <span class="deck-visual__card deck-visual__card--2"></span>
+                <span class="deck-visual__card deck-visual__card--1"></span>
+                <span class="deck-visual__glow"></span>
+              </div>
+              <p class="table-empty__title">静心，想好你的问题</p>
+              <p class="table-empty__sub">洗牌之后，凭第一直觉翻开每一张牌。</p>
+            </div>
+            <div class="card-table" id="card-table" hidden></div>
+          </div>
+
+          <div class="table-foot">
+            <p class="table-hint" id="table-hint">选择牌阵，写下问题，然后洗牌。</p>
+            <span class="table-meta" id="table-meta">78 张牌</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="reading-result" id="reading-result" aria-label="占卜解读" hidden></section>
+    </section>
+
+    <!-- ============================ 每日一牌 ============================ -->
+    <section class="view" id="view-daily" data-view-panel="daily" hidden>
+      <div class="page-head">
+        <p class="eyebrow"><span class="eyebrow__line"></span>DAILY ORACLE</p>
+        <h1>今日之牌</h1>
+        <p>一天只抽一张。把牌面当作一枚安静的提醒，而不是一条命令。</p>
+      </div>
+
+      <div class="daily-layout">
+        <div class="panel daily-copy">
+          <p class="daily-date" id="daily-date">—</p>
+          <h2 id="daily-title">今天，想对你说</h2>
+          <p class="daily-intro" id="daily-intro">在翻开之前，先深呼吸一次，想一想：今天我最需要留意什么？</p>
+
+          <div class="daily-actions">
+            <button type="button" class="primary-btn" id="daily-draw-btn">
+              <span class="primary-btn__label">抽取今日之牌</span>
+              <span class="primary-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </span>
+            </button>
+            <span class="daily-status" id="daily-status"></span>
+          </div>
+
+          <div class="daily-guidance" id="daily-guidance" hidden></div>
+
+          <div class="daily-note">
+            <span class="daily-note__glyph" aria-hidden="true">✧</span>
+            <p>同一天重复进入，会看到同一张牌。明日零点之后，可再抽一张。</p>
+          </div>
+        </div>
+
+        <div class="daily-stage">
+          <div class="daily-card-slot" id="daily-card"></div>
+          <p class="daily-stage__hint" id="daily-stage-hint">轻触牌背，翻开今天。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 牌库 ============================ -->
+    <section class="view" id="view-deck" data-view-panel="deck" hidden>
+      <div class="page-head page-head--row">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__line"></span>THE DECK</p>
+          <h1>七十八张牌</h1>
+          <p>大阿尔卡纳写的是生命的课题，小阿尔卡纳写的是日常的纹理。点击任意一张，读它的正位与逆位。</p>
+        </div>
+        <label class="search-box">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <input type="search" id="deck-search" placeholder="搜索牌名…" aria-label="搜索牌名">
+        </label>
+      </div>
+
+      <div class="filter-row" id="deck-filters" role="group" aria-label="按类别筛选"></div>
+      <div class="deck-grid" id="deck-grid"></div>
+      <p class="empty-note" id="deck-empty" hidden>没有找到这张牌，换一个关键词试试。</p>
+    </section>
+
+    <!-- ============================ 记录 ============================ -->
+    <section class="view" id="view-history" data-view-panel="history" hidden>
+      <div class="page-head page-head--row">
+        <div>
+          <p class="eyebrow"><span class="eyebrow__line"></span>YOUR JOURNAL</p>
+          <h1>占卜记录</h1>
+          <p>每一次提问都是与自己的一次对话。记录只保存在这台设备上。</p>
+        </div>
+        <button type="button" class="ghost-btn ghost-btn--danger" id="clear-history-btn" hidden>清空全部</button>
+      </div>
+
+      <div class="history-list" id="history-list"></div>
+      <div class="history-empty panel" id="history-empty">
+        <span class="history-empty__glyph" aria-hidden="true">✦</span>
+        <h2>还没有留下记录</h2>
+        <p>完成一次占卜后，牌阵会自动保存在这里。</p>
+        <button type="button" class="text-btn" data-view="reading">去抽第一组牌 →</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__brand">
+      <span aria-hidden="true">✦</span>
+      <span>星屿塔罗 · Astra Tarot</span>
+    </div>
+    <p>塔罗是自我觉察的工具，不构成医疗、法律、投资或心理治疗建议。重要决定，请交还给你自己。</p>
+    <span class="site-footer__version">v1.0</span>
+  </footer>
+
+  <!-- 牌义详情 -->
+  <dialog class="modal" id="card-dialog" aria-labelledby="modal-title">
+    <div class="modal__inner">
+      <button type="button" class="modal__close" data-close aria-label="关闭">
+        <svg viewBox="0 0 20 20" fill="none"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+      <div class="modal__card" id="modal-card"></div>
+      <div class="modal__body">
+        <p class="eyebrow" id="modal-eyebrow">MAJOR ARCANA · 0</p>
+        <h2 id="modal-title">愚者</h2>
+        <p class="modal__en" id="modal-en">The Fool</p>
+        <div class="keyword-row" id="modal-keywords"></div>
+        <div class="meaning-block">
+          <h3><span class="dot dot--up"></span>正位</h3>
+          <p id="modal-upright"></p>
+        </div>
+        <div class="meaning-block">
+          <h3><span class="dot dot--down"></span>逆位</h3>
+          <p id="modal-reversed"></p>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 历史解读 -->
+  <dialog class="modal modal--wide" id="history-dialog" aria-labelledby="history-modal-title">
+    <div class="modal__inner">
+      <button type="button" class="modal__close" data-close aria-label="关闭">
+        <svg viewBox="0 0 20 20" fill="none"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+      <div class="modal__body" id="history-modal-body"></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 图形符号 -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="suit-wand" viewBox="0 0 24 24">
+        <path d="M12 22V7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M12 8.2c-3-2.2-2.8-5 .1-6.2 2.5 1.6 2.5 4-.1 6.2Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M8.2 11.5h7.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="12" cy="11.5" r="1.1" fill="currentColor"/>
+      </symbol>
+      <symbol id="suit-cup" viewBox="0 0 24 24">
+        <path d="M5.5 4h13v4.6a6.5 6.5 0 0 1-13 0V4Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M12 15.2V20m-4 .5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M8 7.4c1.3 1 2.6 1 4 0 1.4 1 2.7 1 4 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".8"/>
+      </symbol>
+      <symbol id="suit-sword" viewBox="0 0 24 24">
+        <path d="m12 2 2.3 4.2v9.3H9.7V6.2L12 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M6.5 15.5h11M12 15.5V22" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M15.3 7.5h2.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+      </symbol>
+      <symbol id="suit-coin" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.6" stroke="currentColor" stroke-width="1.3"/>
+        <circle cx="12" cy="12" r="6.2" stroke="currentColor" stroke-width=".8" opacity=".55"/>
+        <path d="m12 6.8 1.6 3.2 3.6.5-2.6 2.5.6 3.6-3.2-1.7-3.2 1.7.6-3.6-2.6-2.5 3.6-.5L12 6.8Z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-spark" viewBox="0 0 24 24">
+        <path d="M12 2c.6 5.6 4.4 9.4 10 10-5.6.6-9.4 4.4-10 10-.6-5.6-4.4-9.4-10-10 5.6-.6 9.4-4.4 10-10Z" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="js/cards.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
