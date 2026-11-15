@@ -777,7 +777,9 @@ main {
   width: 100%;
 }
 .celtic-cross .card-slot:nth-child(1) { grid-area: 2 / 2; }
-.celtic-cross .card-slot:nth-child(2) { grid-area: 2 / 2; z-index: 2; }
+/* 交叉牌的 slot 是透明盒子；不关闭它的命中区域会挡住下面那张牌。 */
+.celtic-cross .card-slot:nth-child(2) { grid-area: 2 / 2; z-index: 2; pointer-events: none; }
+.celtic-cross .card-slot:nth-child(2) .tarot-card { pointer-events: auto; }
 .celtic-cross .card-slot:nth-child(3) { grid-area: 3 / 2; }
 .celtic-cross .card-slot:nth-child(4) { grid-area: 2 / 1; }
 .celtic-cross .card-slot:nth-child(5) { grid-area: 1 / 2; }
